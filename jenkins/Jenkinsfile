@@ -4,19 +4,18 @@ node {
             checkout scm
         }
 
-        // Kita pake image Maven buat nge-build Java
-        // Mirip kayak tadi pake Node image buat React
-        docker.image('maven:3.8.6-openjdk-11-slim').inside {
+        // UPDATE: Pake image Maven 3.9.9 + JDK 21 sesuai request project
+        docker.image('maven:3.9.9-eclipse-temurin-21').inside {
             
             stage('Build') {
                 echo 'Building Java App...'
-                // Perintah Maven buat build jar (-B biar gak cerewet log-nya)
+                // Build package
                 sh 'mvn -B -DskipTests clean package'
             }
 
             stage('Test') {
                 echo 'Running Unit Tests...'
-                // Perintah Maven buat test
+                // Run test
                 sh 'mvn test'
             }
         }
