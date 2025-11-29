@@ -41,7 +41,14 @@ node {
                         sleep 60
                         
                         echo "Stopping Application..."
-                        kill $PID
+                        # Cek apakah proses masih hidup sebelum dibunuh
+                        # 'kill -0' itu cara cek, gak ngebunuh beneran
+                        if kill -0 $PID > /dev/null 2>&1; then
+                            kill $PID
+                            echo "Application stopped manually."
+                        else
+                            echo "Application already finished naturally."
+                        fi
                     '''
                 }
             }
