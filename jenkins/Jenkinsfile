@@ -4,19 +4,46 @@ node {
             checkout scm
         }
 
-        // UPDATE: Pake image Maven 3.9.9 + JDK 21 sesuai request project
+        // Pake image Maven yang sama kayak kemarin
         docker.image('maven:3.9.9-eclipse-temurin-21').inside {
             
             stage('Build') {
                 echo 'Building Java App...'
-                // Build package
                 sh 'mvn -B -DskipTests clean package'
             }
 
             stage('Test') {
                 echo 'Running Unit Tests...'
-                // Run test
                 sh 'mvn test'
+            }
+            
+            // KRITERIA 4: Manual Approval
+            stage('Manual Approval') {
+                input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+            }
+
+            // KRITERIA 2 & 3: Deploy & Sleep
+            stage('Deploy') {
+                echo 'Deploying Application...'
+                
+                // Simulasi Deploy: Jalanin JAR di background, tunggu 60 detik
+                // Kita pake timeout biar gak hanging selamanya kalau ada apa-apa
+                timeout(time: 2, unit: 'MINUTES') {
+                    // 'nohup' biar jalan di background, '&' biar gak nge-block shell
+                    // 'sleep 60' buat menuhin syarat aplikasi jalan 1 menit
+                    sh '''
+                        echo "Starting Application..."
+                        java -jar target/*.jar &
+                        PID=$!
+                        echo "Application started with PID $PID"
+                        
+                        echo "Waiting for 60 seconds (Requirement)..."
+                        sleep 60
+                        
+                        echo "Stopping Application..."
+                        kill $PID
+                    '''
+                }
             }
         }
     } catch (e) {
